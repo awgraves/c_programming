@@ -16,40 +16,21 @@ int main() {
 }
 
 void expand(char s1[], char s2[]) {
-  int i, j, k, skip;
+  int i, j, k;
 
-  i = j = k = skip = 0;
+  i = j = k = 0;
   while (s1[i] != '\0' && j < MAX_RESULT) {
-    // ignore leading '-'
-    if (s1[i] == '-') {
-      while (s1[i] != ' ' && s1[i] != EOF && j < MAX_RESULT)
-        s2[j++] = s1[i++];
-      continue;
-    }
-
-    // advance leading non-alphanumeric
-    if (!isalnum(s1[i])) {
-      s2[j++] = s1[i++];
-      continue;
-    }
+    s2[j++] = s1[i++];
 
     // ranges
-    while (s1[i + 1] == '-' &&
-           ((isalpha(s1[i]) && isalpha(s1[i + 2])) ||
-            (isdigit(s1[i]) && isdigit(s1[i + 2]))) &&
-           !(skip = s1[i + 3] == '-') && // to handle edge case like a-b-c
-           s1[i] < s1[i + 2]) {
-      for (k = s1[i]; k <= s1[i + 2] && j < MAX_RESULT; ++k)
+    while (s1[i] == '-' &&
+           ((isalpha(s1[i - 1]) && isalpha(s1[i + 1])) ||
+            (isdigit(s1[i - 1]) && isdigit(s1[i + 1]))) &&
+           s1[i - 1] < s1[i + 1]) {
+      for (k = s1[i - 1] + 1; k <= s1[i + 1] && j < MAX_RESULT; ++k)
         s2[j++] = k;
-      i += 3;
+      i += 2;
     }
-    if (skip) {
-      while (s1[i] != ' ' && s1[i] != EOF && j < MAX_RESULT)
-        s2[j++] = s1[i++];
-      continue;
-    }
-
-    s2[j++] = s1[i++];
   }
   s2[j] = '\0';
 }
