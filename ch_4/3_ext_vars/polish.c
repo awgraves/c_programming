@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,6 +30,10 @@ int main() {
       break;
     case '*':
       push(pop() * pop());
+      break;
+    case '%':
+      op2 = pop();
+      push(fmod(pop(), op2));
       break;
     case '-':
       op2 = pop();
@@ -80,10 +85,20 @@ int getop(char s[]) {
   while ((s[0] = c = getch()) == ' ' || c == '\t')
     ;
   s[1] = '\0';
-  if (!isdigit(c) && c != '.')
+  if (!isdigit(c) && c != '.' && c != '-') {
     return c; // not a number
+  }
 
+  // handle minus sign vs beginning of negative number
   i = 0;
+  if (c == '-') {
+    if (!isdigit((c = getch()))) {
+      ungetch(c);
+      return '-';
+    }
+    s[++i] = c;
+  }
+
   if (isdigit(c)) // collect integer part
     while (isdigit(s[++i] = c = getch()))
       ;
