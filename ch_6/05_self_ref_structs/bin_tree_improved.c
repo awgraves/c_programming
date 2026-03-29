@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define MAXWORDLEN 100
-#define MAXWORDS 1000
+#define MAXWORDS 100
 
 struct tnode {
   char *word;
@@ -82,6 +82,11 @@ char *strdupl(char *);
 struct tnode *addtree(struct tnode *p, char *w, int *count,
                       struct tnode results[]) {
   int cond;
+
+  if (*count >= MAXWORDS) {
+    printf("ERROR: exceeded max word count\n");
+    return p;
+  }
 
   if (p == NULL) { // new word has arrived
     p = &results[(*count)++];
