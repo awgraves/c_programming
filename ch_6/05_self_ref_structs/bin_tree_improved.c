@@ -13,9 +13,8 @@ struct tnode {
   struct tnode *right;
 };
 
-struct tnode *addtree(struct tnode *, char *);
-void treetoarray(struct tnode *, struct tnode **, int *);
-void quicksort(struct tnode *list[], int left, int right);
+struct tnode *addtree(struct tnode *, char *, int *idx, struct tnode[]);
+void quicksort(struct tnode list[], int left, int right);
 
 int getword(char *, int);
 
@@ -25,19 +24,19 @@ int main() {
   struct tnode *root;
   char word[MAXWORDLEN];
 
+  struct tnode results[MAXWORDS]; // allocate tnode array
+
   root = NULL;
+  int count = 0;
   while (getword(word, MAXWORDLEN) != EOF)
     if (isalpha(word[0]))
-      root = addtree(root, word);
+      root = addtree(root, word, &count, results);
 
-  struct tnode *results[MAXWORDS];
-  int count = 0;
-  treetoarray(root, results, &count);
   quicksort(results, 0, count - 1);
 
   printf("\n");
   for (int i = 0; i < count; i++)
-    printf("%d %s\n", results[i]->count, results[i]->word);
+    printf("%d %s\n", results[i].count, results[i].word);
   return 0;
 }
 
@@ -80,33 +79,22 @@ void ungetch(int c) {
 struct tnode *talloc(void);
 char *strdupl(char *);
 
-struct tnode *addtree(struct tnode *p, char *w) {
+struct tnode *addtree(struct tnode *p, char *w, int *count,
+                      struct tnode results[]) {
   int cond;
 
   if (p == NULL) { // new word has arrived
-    p = talloc();
+    p = &results[(*count)++];
     p->word = strdupl(w);
     p->count = 1;
     p->left = p->right = NULL;
   } else if ((cond = strcmp(w, p->word)) == 0)
     p->count++;
   else if (cond < 0)
-    p->left = addtree(p->left, w);
+    p->left = addtree(p->left, w, count, results);
   else
-    p->right = addtree(p->right, w);
+    p->right = addtree(p->right, w, count, results);
   return p;
-}
-
-void treetoarray(struct tnode *p, struct tnode *result[], int *count) {
-  if (p != NULL) {
-    result[(*count)++] = p;
-    treetoarray(p->left, result, count);
-    treetoarray(p->right, result, count);
-  }
-}
-
-struct tnode *talloc(void) {
-  return (struct tnode *)malloc(sizeof(struct tnode));
 }
 
 char *strdupl(char *s) {
@@ -118,24 +106,24 @@ char *strdupl(char *s) {
   return p;
 }
 
-void quicksort(struct tnode *v[], int left, int right) {
+void quicksort(struct tnode v[], int left, int right) {
   int i, last;
-  void swap(struct tnode * v[], int i, int j);
+  void swap(struct tnode v[], int i, int j);
 
   if (left >= right)
     return;
   swap(v, left, (left + right) / 2); // use the middle num as the pivot
   last = left;
   for (i = left + 1; i <= right; i++)
-    if (v[i]->count > v[left]->count)
+    if (v[i].count > v[left].count)
       swap(v, ++last, i);
   swap(v, left, last);
   quicksort(v, left, last - 1);
   quicksort(v, last + 1, right);
 }
 
-void swap(struct tnode *v[], int i, int j) {
-  struct tnode *temp = v[i];
+void swap(struct tnode v[], int i, int j) {
+  struct tnode temp = v[i];
   v[i] = v[j];
   v[j] = temp;
 }
